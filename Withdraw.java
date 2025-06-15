@@ -1,0 +1,106 @@
+
+package bank.management.system;
+
+
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import java.util.*;
+import java.sql.*;
+public class Withdraw extends JFrame implements ActionListener{
+    
+    JTextField t1,t2;
+    JButton b1,b2,b3;
+    JLabel l1,l2,l3;
+    String pin;
+     Withdraw(String pin){
+        this.pin = pin;
+        ImageIcon i1 = new ImageIcon("\"C:\\Users\\sudha\\OneDrive\\Documents\\NetBeansProjects\\bank management system\\src\\bank\\management\\system\\atm2.jpg\"");
+        Image i2 = i1.getImage().getScaledInstance(1000, 1180, Image.SCALE_DEFAULT);
+        ImageIcon i3 = new ImageIcon(i2);
+        JLabel l3 = new JLabel(i3);
+        l3.setBounds(0, 0, 960, 1080);
+        add(l3);
+        
+        l1 = new JLabel("ENTER AMOUNT YOU WANT TO  Withdraw");
+        l1.setForeground(Color.black);
+        l1.setFont(new Font("System", Font.BOLD, 16));
+        
+        t1 = new JTextField();
+        t1.setFont(new Font("Raleway", Font.BOLD, 22));
+        
+        b1 = new JButton("WITHDRAW");
+        b2 = new JButton("BACK");
+        
+        setLayout(null);
+        
+        l1.setBounds(190,350,400,35);
+        l3.add(l1);
+        
+        t1.setBounds(190,420,320,25);
+        l3.add(t1);
+        
+        b1.setBounds(390,588,150,35);
+        l3.add(b1);
+        
+        b2.setBounds(390,633,150,35);
+        l3.add(b2);
+        
+        b1.addActionListener(this);
+        b2.addActionListener(this);
+        
+        setSize(960,1080);
+        setUndecorated(true);
+        setLocation(500,0);
+        setVisible(true);
+    }
+    
+    public void actionPerformed(ActionEvent ae){
+      
+    try {
+        String amount = t1.getText();
+        java.util.Date utilDate = new java.util.Date(); // Using java.util.Date
+
+        if (ae.getSource() == b1) {
+            if (t1.getText().equals("")) {
+                JOptionPane.showMessageDialog(null, "Please enter the Amount you want to Withdraw");
+            } else {
+                Conn c1 = new Conn();
+
+                ResultSet rs = c1.s.executeQuery("select * from bank where pin = '" + pin + "'");
+                int balance = 0;
+                while (rs.next()) {
+                    if (rs.getString("type").equals("Deposit")) {
+                        balance += Integer.parseInt(rs.getString("amount"));
+                    } else {
+                        balance -= Integer.parseInt(rs.getString("amount"));
+                    }
+                }
+                if (balance < Integer.parseInt(amount)) {
+                    JOptionPane.showMessageDialog(null, "Insufficient Balance");
+                    return;
+                }
+
+                c1.s.executeUpdate("insert into bank values('" + pin + "', '" + utilDate + "', 'Withdrawal', '" + amount + "')");
+                JOptionPane.showMessageDialog(null, "Rs. " + amount + " Debited Successfully");
+
+                setVisible(false);
+                new transaction(pin).setVisible(true);
+            }
+        } else if (ae.getSource() == b2) {
+            // When the "BACK" button is clicked, start the transaction(pin) method
+            setVisible(false);
+            new transaction(pin).setVisible(true);
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
+
+    
+    public static void main(String[] args){
+        new  Withdraw("").setVisible(true);
+    }
+}
+
